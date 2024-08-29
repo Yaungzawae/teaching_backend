@@ -121,7 +121,8 @@ module.exports.editTeacherDetails = async (req, res) => {
         if (req.file) {
             teacherUpdate.img = `${req.file.destination}/${tr_id}${extension}`;
         }
-
+        
+        console.log( teacherUpdate.img )
         console.log(teacherUpdate)
 
         const teacher = await Teacher.findOneAndUpdate(
