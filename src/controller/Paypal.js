@@ -57,7 +57,7 @@ module.exports.registerPayPal = async (req, res) => {
         // Execute the order creation request
         const order = await client.execute(request);
 
-        console.log(order.result.id);
+        console.log(order)
         
         // Send back the order ID to the frontend for the user to complete payment
         res.status(200).json({ 
@@ -79,6 +79,8 @@ module.exports.confirmRegistrationPayPal = async (req, res) => {
         request.requestBody({});
 
         const capture = await client.execute(request);
+
+        console.log(capture);
 
         if (capture.result.status === 'COMPLETED') {
             const { purchase_units } = capture.result;

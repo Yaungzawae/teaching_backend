@@ -2,15 +2,13 @@ const {
     formatError,
     formatMongooseUniqueError,
 } = require("../helpers/formatError");
-const jwt = require("jsonwebtoken");
-const { createCookie, getUserId } = require("../helpers/jwt");
+const { createCookie } = require("../helpers/jwt");
 const User = require("../model/User");
 const bcrypt = require("bcrypt");
 const ejs = require("ejs");
 const path = require("path");
 const Otp = require("../model/OTP");
 const { sendMail } = require("../helpers/sendMail");
-const { permission } = require("process");
 
 
 module.exports.registerUser = async (req, res) => {
@@ -102,6 +100,38 @@ module.exports.adminLogin = async(req, res) => {
             return res.status(401).json(formatError({message: "Wrorng Password"}))
         }
     } catch(err) {
+        console.log(err);
+    }
+}
+
+
+module.exports.forgotPassword = async(req, res) => {
+    try{
+        const {email, password, otp} = req.body;
+
+        const otp_response = await Otp.findOne({ email: req.body.email });
+
+        if (otp_response == null) {
+            res.status(401).json(formatError({ otp: "Otp Needed" }));
+            return;
+        }
+
+        if (otp_response.otp != otp){
+            res.status(401).json(formatError({ otp: "Otp does not match"}));
+            return;
+        }
+
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
+        const user = await User.findOneAndUpdate({email: email},
+            {password: hashedPassword}
+        )
+
+        await Otp.deleteOne({email: req.body.email});
+        res.sendStatus(200);
+
+    } catch(err){
         console.log(err);
     }
 }
