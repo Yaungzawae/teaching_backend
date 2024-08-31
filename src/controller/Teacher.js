@@ -36,9 +36,7 @@ module.exports.createTeacher = async (req, res) => {
             if(err){
                 console.log(err)
             }
-        } )
-
-        
+        })
 
         res.cookie("jwt", createCookie({ id: newTeacher._id, permission: "teacher" }));
         res.sendStatus(201);
@@ -73,16 +71,16 @@ module.exports.loginTeacher = async (req, res) => {
 }
 
 module.exports.getOneTeacher = async (req, res) => {
-
-    const id = req.body._id ? req.body._id : getUserId(req.cookies.jwt);
-    console.log(req.body._id);
-
+    
+    
     try {
+        const id = req.body._id ?  req.body._id : getUserId(req.cookies.jwt);
         const oneDetail = await Teacher.findOne({ _id: new mongoose.Types.ObjectId(id) });
         console.log(oneDetail)
         return res.status(200).json(oneDetail);
     } catch (err) {
         console.log(err);
+        return res.status(401).json({message: "This Page is only for teachers"})
     }
 
 }
@@ -118,11 +116,14 @@ module.exports.editTeacherDetails = async (req, res) => {
             teacherUpdate.description = req.body.description;
         }
 
+        if (req.body.contact) {
+            teacherUpdate.contact = req.body.contact;
+        }
+
         if (req.file) {
             teacherUpdate.img = `${req.file.destination}/${tr_id}${extension}`;
         }
-        
-        console.log( teacherUpdate.img )
+
         console.log(teacherUpdate)
 
         const teacher = await Teacher.findOneAndUpdate(
@@ -169,3 +170,17 @@ module.exports.deleteTeacher = async (req, res) => {
         return res.status(500).json({ error: "An error occurred while deleting the teacher" });
     }
 };
+
+
+module.exports.accessTeacher = async(req, res) => {
+    try{
+        const teacher = await Teacher.findOne({_id: req.body._id});
+
+        if(!teacher) return res.status(404).json({message: "Teacher Not Found"});
+
+        res.cookie("jwt", createCookie({ id: teacher._id, permission: "teacher" }));
+        return res.sendStatus(200);
+    } catch(err) {
+        console.log(err)
+    }
+}

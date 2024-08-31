@@ -1,6 +1,6 @@
 
 const path = require("path");
-const { createTeacher, loginTeacher, getOneTeacher, getAllTeachers, editTeacherDetails, deleteTeacher } = require("../controller/Teacher");
+const { createTeacher, loginTeacher, getOneTeacher, getAllTeachers, editTeacherDetails, deleteTeacher, accessTeacher } = require("../controller/Teacher");
 const { getUserId } = require("../helpers/jwt");
 const { isTeacher } = require("../middlewares/validateCookie");
 const multer = require("multer");
@@ -34,6 +34,8 @@ Router.post("/get-all-teachers", getAllTeachers)
 Router.post("/edit", upload.single('img') ,editTeacherDetails); 
 
 Router.post("/delete", deleteTeacher);
+
+Router.post("/access-teacher", accessTeacher);
 
 // Router.post("/login", userValidator, handleValidatorError, loginUser);
 
