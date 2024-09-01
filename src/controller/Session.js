@@ -160,3 +160,13 @@ module.exports.editSession = async (req, res) => {
         res.sendStatus(500);
     }
 };
+
+module.exports.deleteSession = async (req, res) => {
+    try{
+        await Session.findByIdAndDelete(req.body.class_id);
+        res.sendStatus(201);
+    } catch(err){
+        console.log(err)
+        res.sendStatus(500);
+    }
+}
