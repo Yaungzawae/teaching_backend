@@ -13,7 +13,7 @@ module.exports.createClass = async (req, res) => {
             start_date: req.body.startDate,
             schedule: JSON.parse(req.body.schedule),
             description: req.body.description,
-            max_seat: req.body.maxSeat,
+            max_seat: req.body.max_seat,
             teacher: getUserId(req.cookies.jwt),
             text_book: `${req.file.destination}/${req.file.filename}`
         })
@@ -113,6 +113,8 @@ module.exports.editClass = async (req, res) => {
         if (req.file) {
             updateData.text_book = `${req.file.destination}/${req.file.filename}`;
         }
+
+        console.log(updateData);
 
         await Class.findByIdAndUpdate(req.body.courseId, updateData);
         res.sendStatus(200);

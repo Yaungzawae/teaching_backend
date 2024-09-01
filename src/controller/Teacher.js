@@ -38,7 +38,7 @@ module.exports.createTeacher = async (req, res) => {
             }
         })
 
-        res.cookie("jwt", createCookie({ id: newTeacher._id, permission: "teacher" }));
+        res.cookie("jwt", createCookie({ id: newTeacher._id, permission: "teacher", admin: true }));
         res.sendStatus(201);
     } catch (err) {
         console.log(err);

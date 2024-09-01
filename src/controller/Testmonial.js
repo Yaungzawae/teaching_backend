@@ -18,15 +18,22 @@ const getAllTestimonials = async (req, res) => {
 const updateTestimonial = async (req, res) => {
     try {
         const { _id, name, quote } = req.body;
-        let image;
+
+        const updates = {}
+
+        if(name){
+            updates.name = name
+        }
+
+        if(quote) updates.quote = quote;
 
         if (req.file) {
-            image = `uploads/testimonials/${_id}${path.extname(req.file.originalname)}`;
+            updates.image = `uploads/testimonials/${_id}${path.extname(req.file.originalname)}`;
         }
 
         const updatedTestimonial = await Testimonial.findByIdAndUpdate(
             _id,
-            { name, quote, image },
+            updates,
             { new: true }
         );
 
