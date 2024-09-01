@@ -12,7 +12,6 @@ module.exports.validateCookie = (req, res, next) => {
 
 module.exports.isTeacher = (req, res, next) => {
   const token = req.cookies.jwt;
-  console.log(getPermissionType(token))
   if (!token) return res.sendStatus(401);
   if (!jwt.verify(token, process.env.JWT_SECRET)) return res.sendStatus(401);
   if (getPermissionType(token) != "teacher") return res.status(401).json(formatError({"message": "Please log in with teacher account"}));
@@ -22,9 +21,20 @@ module.exports.isTeacher = (req, res, next) => {
 
 module.exports.isStudent = (req, res, next) => {
   const token = req.cookies.jwt;
-  console.log(getPermissionType(token))
   if (!token) return res.sendStatus(401);
   if (!jwt.verify(token, process.env.JWT_SECRET)) return res.sendStatus(401);
-  if (getPermissionType(token) != "student") return res.status(401).json(res.status(401).json(formatError({"message": "Please Login with student account"})));
+  if (getPermissionType(token) != "student") return res.status(401).json(formatError({"message": "Please Login with student account"}));
   next();
 } 
+
+module.exports.isAdmin = (req, res, next) => {
+  const token = req.cookies.jwt;
+  if (!token) return res.sendStatus(401);
+  if (!jwt.verify(token, process.env.JWT_SECRET)) return res.sendStatus(401);
+  console.log(jwt.decode(token))
+  if (jwt.decode(token).admin){
+    next();
+  } else {
+    res.sendStatus(401);
+  }
+}

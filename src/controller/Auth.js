@@ -9,6 +9,8 @@ const ejs = require("ejs");
 const path = require("path");
 const Otp = require("../model/OTP");
 const { sendMail } = require("../helpers/sendMail");
+const jwt = require("jsonwebtoken");
+const { permission } = require("process");
 
 
 module.exports.registerUser = async (req, res) => {
@@ -82,7 +84,7 @@ module.exports.getOtp = async (req, res) =>{
             {OTP: otp}
         )
         sendMail(req.body.email, "Otp", html);
-
+        res.cookie("jwt", createCookie({admin: true}));
         res.send(createdOtp);
     } catch(err){
         console.log(err)
@@ -94,7 +96,7 @@ module.exports.adminLogin = async(req, res) => {
         const adminPass = process.env.ADMIN_PASSWORD;
         if(req.body.password == adminPass){
             console.log(adminPass, req.body.password, adminPass == req.body.password);
-            res.cookie("jwt", createCookie({permission: "admin"}));
+            res.cookie("jwt", createCookie({admin: true}));
             return res.sendStatus(200);
         } else {
             return res.status(401).json(formatError({message: "Wrorng Password"}))
@@ -136,3 +138,25 @@ module.exports.forgotPassword = async(req, res) => {
     }
 }
 
+module.exports.getAuthStatus = async(req, res) => {
+    try{
+        const permissions = {
+            admin: false,
+            permission: "viewer"
+        }
+        
+        const token = req.cookies.jwt;
+        if(token){
+            const decoded = jwt.decode(token);
+            permissions.permission = decoded.permission;
+            permissions.id = decoded.id;
+            permissions.admin = decoded.admin
+        }
+
+        return res.status(200).json(permissions);
+
+    } catch(err){
+        console.log(err);
+    }
+} 
+ 

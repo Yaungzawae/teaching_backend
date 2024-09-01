@@ -59,22 +59,66 @@ module.exports.getStudents = async (req, res) => {
     }
 };
 
+// module.exports.editClass = async (req, res) => {
+//     console.log(req.body)
+//     try {
+//         await Class.findByIdAndUpdate(req.body.courseId , 
+//             {
+//                 title: req.body.title,
+//                 price: req.body.price,
+//                 start_date: req.body.startDate,
+//                 schedule: JSON.parse(req.body.schedule),
+//                 description: req.body.description,
+//                 max_seat: req.body.maxSeat,
+//                 teacher: getUserId(req.cookies.jwt),
+//                 text_book: `${req.file.destination}/${req.file.filename}`
+//             }
+//         );
+//         res.sendStatus(200);
+//     } catch (err) {
+//         console.log(err);
+//         res.sendStatus(500);
+//     }
+// };
+
 module.exports.editClass = async (req, res) => {
-    console.log(req.body)
+    console.log(req.body);
     try {
-        console.log(req.body);
-        await Class.findByIdAndUpdate(req.body.courseId , 
-            {
-                title: req.body.title,
-                price: req.body.price,
-                start_date: req.body.startDate,
-                schedule: JSON.parse(req.body.schedule),
-                description: req.body.description,
-                max_seat: req.body.maxSeat,
-                teacher: getUserId(req.cookies.jwt),
-                text_book: `${req.file.destination}/${req.file.filename}`
-            }
-        );
+        // Create an empty object to hold the fields to be updated
+        const updateData = {};
+
+        // Add fields to updateData only if they are present in the request
+        if (req.body.title) {
+            updateData.title = req.body.title;
+        }
+
+        if (req.body.price) {
+            updateData.price = req.body.price;
+        }
+
+        if (req.body.startDate) {
+            updateData.start_date = req.body.startDate;
+        }
+
+        if (req.body.schedule) {
+            updateData.schedule = JSON.parse(req.body.schedule);
+        }
+
+        if (req.body.description) {
+            updateData.description = req.body.description;
+        }
+
+        if (req.body.maxSeat) {
+            updateData.max_seat = req.body.maxSeat;
+        }
+
+
+        if (req.file) {
+            updateData.text_book = `${req.file.destination}/${req.file.filename}`;
+        }
+
+        await Class.findByIdAndUpdate(req.body.courseId, updateData);
+
         res.sendStatus(200);
     } catch (err) {
         console.log(err);

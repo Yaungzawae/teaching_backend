@@ -99,7 +99,6 @@ module.exports.getAllTeachers = async (req, res) => {
 module.exports.editTeacherDetails = async (req, res) => {
 
     try {
-        const extension = path.extname(req.file.originalname)
         const teacherUpdate = {};
 
         const tr_id = getUserId(req.cookies.jwt);
@@ -121,22 +120,22 @@ module.exports.editTeacherDetails = async (req, res) => {
         }
 
         if (req.file) {
-            teacherUpdate.img = `${req.file.destination}/${tr_id}${extension}`;
-        }
+            const extension = path.extname(req.file.originalname)
 
-        console.log(teacherUpdate)
+            teacherUpdate.img = `${req.file.destination}/${tr_id}${extension}`;
+
+            fs.rename(`${req.file.path}` , `${req.file.destination}/${tr_id}${extension}`, function(err){
+                if(err){
+                    console.log(err)
+                }
+            } )    
+        }
 
         const teacher = await Teacher.findOneAndUpdate(
             { _id: getUserId(req.cookies.jwt) },
-            teacherUpdate,
+            teacherUpdate, 
             { new: true } 
         );
-
-        fs.rename(`${req.file.path}` , `${req.file.destination}/${tr_id}${extension}`, function(err){
-            if(err){
-                console.log(err)
-            }
-        } )
 
         return res.sendStatus(200);
     } catch (err) {
@@ -178,7 +177,7 @@ module.exports.accessTeacher = async(req, res) => {
 
         if(!teacher) return res.status(404).json({message: "Teacher Not Found"});
 
-        res.cookie("jwt", createCookie({ id: teacher._id, permission: "teacher" }));
+        res.cookie("jwt", createCookie({ id: teacher._id, permission: "teacher", admin: true}));
         return res.sendStatus(200);
     } catch(err) {
         console.log(err)

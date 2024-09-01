@@ -22,7 +22,6 @@ const updateTestimonial = async (req, res) => {
 
         if (req.file) {
             image = `uploads/testimonials/${_id}${path.extname(req.file.originalname)}`;
-            console.log(image);
         }
 
         const updatedTestimonial = await Testimonial.findByIdAndUpdate(
@@ -79,4 +78,4 @@ module.exports = {
     updateTestimonial,
     createTestimonial,
     deleteTestimonial,
-};
+}; 

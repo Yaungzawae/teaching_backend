@@ -36,7 +36,7 @@ Router.post("/edit", upload.single('img') ,editTeacherDetails);
 Router.post("/delete", deleteTeacher);
 
 Router.post("/access-teacher", accessTeacher);
-
+ 
 // Router.post("/login", userValidator, handleValidatorError, loginUser);
 
 // Router.post("/getOtp", getOtp);

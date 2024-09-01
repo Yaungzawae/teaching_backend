@@ -8,10 +8,11 @@ module.exports.createCookie = (payload, duration = "24h") => {
 };
 
 module.exports.getUserId = (token) => {
-  return jwt.decode(token).id;
+  const decoded = jwt.decode(token);
+  return decoded ? jwt.decode(token).id : decoded;
 };
 
 module.exports.getPermissionType = (token) => {
-  console.log(jwt.decode(token))
   return jwt.decode(token).permission;
 }
+
