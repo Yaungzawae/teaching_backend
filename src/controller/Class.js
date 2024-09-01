@@ -84,10 +84,8 @@ module.exports.getStudents = async (req, res) => {
 module.exports.editClass = async (req, res) => {
     console.log(req.body);
     try {
-        // Create an empty object to hold the fields to be updated
         const updateData = {};
 
-        // Add fields to updateData only if they are present in the request
         if (req.body.title) {
             updateData.title = req.body.title;
         }
@@ -112,14 +110,13 @@ module.exports.editClass = async (req, res) => {
             updateData.max_seat = req.body.maxSeat;
         }
 
-
         if (req.file) {
             updateData.text_book = `${req.file.destination}/${req.file.filename}`;
         }
 
         await Class.findByIdAndUpdate(req.body.courseId, updateData);
-
         res.sendStatus(200);
+
     } catch (err) {
         console.log(err);
         res.sendStatus(500);

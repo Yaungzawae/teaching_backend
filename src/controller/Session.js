@@ -114,3 +114,49 @@ module.exports.getOneSession = async(req, res)=>{
         res.status(500).json({ message: 'Server error' });
     }
 }
+
+module.exports.editSession = async (req, res) => {
+    console.log(req.body);
+    try {
+        const updateData = {};
+
+        if (req.body.title) {
+            updateData.title = req.body.title;
+        }
+
+        if (req.body.price) {
+            updateData.price = req.body.price;
+        }
+
+        if (req.body.date) {
+            updateData.date = req.body.date;
+        }
+
+        if (req.body.start_time) {
+            updateData.start_time = req.body.start_time;
+        }
+
+        if (req.body.end_time) {
+            updateData.end_time = req.body.end_time;
+        }
+
+        if (req.body.description) {
+            updateData.description = req.body.description;
+        }
+
+        if (req.body.teacher) {
+            updateData.teacher = req.body.teacher;
+        }
+
+        if (req.file) {
+            updateData.text_book = `${req.file.destination}/${req.file.filename}`;
+        }
+
+        await Session.findByIdAndUpdate(req.body.sessionId, updateData);
+        res.sendStatus(200);
+
+    } catch (err) {
+        console.log(err);
+        res.sendStatus(500);
+    }
+};

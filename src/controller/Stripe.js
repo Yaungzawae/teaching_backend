@@ -41,10 +41,8 @@ module.exports.registerClassStripe = async (req, res) => {
             }
         });
 
-        console.log(paymentIntent)
         res.status(200).json({ 
             clientSecret: paymentIntent.client_secret,
-            // qrCodeUrl: paymentIntent.next_action.promptpay_display_qr_code.qr_code_url
         });
 
     } catch (err) {

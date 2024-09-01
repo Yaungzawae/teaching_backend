@@ -4,6 +4,11 @@ const { getUserId } = require('../helpers/jwt');
 const Class = require('../model/Class');
 const paypal = require('@paypal/checkout-server-sdk');
 const Session = require('../model/Session');
+const Payments = require('../model/ManualPayment');
+const User = require('../model/User');
+const ejs = require("ejs");
+const path = require('path');
+const { sendMail } = require('../helpers/sendMail');
 
 
 // Set up PayPal environment with the provided Client ID and Client Secret from environment variables
@@ -71,7 +76,10 @@ module.exports.registerPayPal = async (req, res) => {
 
 // Capture PayPal payment and confirm registration
 module.exports.confirmRegistrationPayPal = async (req, res) => {
-    const { orderID } = req.body;
+    console.log("Paypal Succ")
+    const { course_id, type, orderID } = req.body;
+    const student_id = getUserId(req.cookies.jwt);
+    console.log(course_id, student_id)
 
     try {
         // Capture the PayPal payment using the order ID
@@ -79,12 +87,13 @@ module.exports.confirmRegistrationPayPal = async (req, res) => {
         request.requestBody({});
 
         const capture = await client.execute(request);
+        console.log(capture, capture.purchase_units)
 
         if (capture.result.status === 'COMPLETED') {
-            const { purchase_units } = capture.result;
-            const { reference_id: student_id, custom_id: course_id } = purchase_units[0];
+            // const { purchase_units } = capture.result;
+            // const { reference_id: student_id, custom_id: course_id } = purchase_units[0];
 
-            // Find the course and ensure it has available seats before confirming registration
+
             const course = type == "session" ?
             await Session.findOneAndUpdate(
                 {
@@ -96,7 +105,7 @@ module.exports.confirmRegistrationPayPal = async (req, res) => {
                     isBooked: true
                 },
                 {new: true}
-            )
+            ) 
             :
             await Class.findOneAndUpdate(
                 {
@@ -114,7 +123,27 @@ module.exports.confirmRegistrationPayPal = async (req, res) => {
                 return res.status(400).json(formatError({ message: 'Cannot register, class is full or does not exist' }));
             }
 
-            // Return the updated course information as a confirmation of successful registration
+            const payment = await Payments.create({
+                studentId: student_id,
+                courseId: course_id,
+                isAccepted: true,
+                amount: course.price,
+                type: type,
+                paymentMethod: "Pay Pal"
+            })
+
+            const student = await User.findOne({_id: student_id});
+
+            const html = await ejs.renderFile(
+                path.join(__dirname, "../views/templates/courseRegisterationTemplate.ejs"),
+            )
+
+            const attachments = type == "session" ? [] : [
+                {filename: `${course.text_book}`}
+            ]; 
+            
+            sendMail(student.email, "Class Registeration", html, attachments);
+
             res.status(200).json(course);
         } else {
             res.status(400).json(formatError({ message: 'Payment not completed' }));
