@@ -19,8 +19,7 @@ module.exports.createTeacher = async (req, res) => {
 
         const newTeacherId = new mongoose.Types.ObjectId();
 
-        const extension = path.extname(req.file.originalname)
-        console.log(extension)
+        const img = req.file ? `${req.file.destination}/${newTeacherId}${path.extname(req.file.originalname)}` : null;
 
         const newTeacher = await Teacher.create({
             _id: newTeacherId,
@@ -29,20 +28,23 @@ module.exports.createTeacher = async (req, res) => {
             password: hashed,
             description: req.body.description,
             contact: req.body.contact,
-            img: `${req.file.destination}/${newTeacherId}${extension}`
+            img: img
         })
 
-        fs.rename(`${req.file.path}` , `${req.file.destination}/${newTeacher._id}${extension}`, function(err){
-            if(err){
-                console.log(err)
-            }
-        })
+        if(img){
+            fs.rename(`${req.file.path}` , `${req.file.destination}/${newTeacher._id}${path.extname(req.file.originalname)}`, function(err){
+                if(err){
+                    console.log(err)
+                }
+            })
+        }
+
 
         res.cookie("jwt", createCookie({ id: newTeacher._id, permission: "teacher", admin: true }));
         res.sendStatus(201);
     } catch (err) {
         console.log(err);
-        res.status(401).json(formatMongooseUniqueError(err.errors));
+        res.status(401).json(err);
     }
 }
 
